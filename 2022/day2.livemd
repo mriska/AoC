@@ -1,0 +1,86 @@
+# Day 2
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.1"}
+])
+```
+
+## Section
+
+```elixir
+text = Kino.Input.textarea("Input here:")
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input =
+  text
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+
+defmodule RPS1 do
+  def calculate_points([opponent, answer]) do
+    # outcome_points(opponent, answer)
+    outcome_points(opponent, answer) + shape_points(answer)
+  end
+
+  defp outcome_points(opponent, answer) do
+    case Integer.mod(shape_points(opponent) - shape_points(answer), 3) do
+      0 -> 3
+      2 -> 6
+      1 -> 0
+    end
+  end
+
+  defp shape_points("A"), do: 1
+  defp shape_points("B"), do: 2
+  defp shape_points("C"), do: 3
+
+  defp shape_points("X"), do: 1
+  defp shape_points("Y"), do: 2
+  defp shape_points("Z"), do: 3
+end
+
+input
+|> Enum.map(&String.split(&1, " "))
+|> Enum.map(&RPS1.calculate_points/1)
+|> Enum.sum()
+```
+
+## Part 2
+
+```elixir
+defmodule RPS2 do
+  def calculate_points([opponent, strategy]) do
+    shape_points(opponent, strategy) + strategy_points(strategy)
+  end
+
+  defp shape_points(opponent, strategy) do
+    case strategy do
+      "X" -> shape_points(opponent) - 1
+      "Y" -> shape_points(opponent)
+      "Z" -> shape_points(opponent) + 1
+    end
+    |> Kernel.-(1)
+    |> Integer.mod(3)
+    |> Kernel.+(1)
+  end
+
+  defp shape_points("A"), do: 1
+  defp shape_points("B"), do: 2
+  defp shape_points("C"), do: 3
+
+  defp strategy_points("X"), do: 0
+  defp strategy_points("Y"), do: 3
+  defp strategy_points("Z"), do: 6
+end
+
+input
+|> Enum.map(&String.split(&1, " "))
+|> Enum.map(&RPS2.calculate_points/1)
+|> Enum.sum()
+```

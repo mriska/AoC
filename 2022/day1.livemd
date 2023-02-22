@@ -1,0 +1,41 @@
+# Day 1
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.1"}
+])
+```
+
+## Section
+
+```elixir
+text = Kino.Input.textarea("Input here:")
+```
+
+## Part 1
+
+```elixir
+rations =
+  text
+  |> Kino.Input.read()
+  |> String.split("\n\n")
+  |> Enum.map(
+    &(&1
+      |> String.split("\n", trim: true)
+      |> Enum.reduce(0, fn x, acc -> acc + String.to_integer(x) end))
+  )
+
+rations
+|> Enum.sort()
+|> List.last()
+```
+
+## Part 2
+
+```elixir
+rations
+|> Enum.sort()
+|> Enum.reverse()
+|> Enum.take(3)
+|> Enum.sum()
+```

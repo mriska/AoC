@@ -1,0 +1,58 @@
+# Day 4
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.1"}
+])
+```
+
+## Section
+
+```elixir
+text = Kino.Input.textarea("Input here:")
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Cleanup do
+  def split_pair(string) do
+    string
+    |> String.split(",")
+    |> Enum.map(&range_to_mapset/1)
+  end
+
+  def fully_contained([set_a, set_b]) do
+    MapSet.subset?(set_a, set_b) || MapSet.subset?(set_b, set_a)
+  end
+
+  def overlaps([set_a, set_b]) do
+    !MapSet.disjoint?(set_a, set_b)
+  end
+
+  defp range_to_mapset(range) do
+    [start, finish] = String.split(range, "-")
+
+    String.to_integer(start)..String.to_integer(finish)
+    |> MapSet.new()
+  end
+end
+
+input =
+  text
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.map(&Cleanup.split_pair/1)
+
+input
+|> Enum.count(&Cleanup.fully_contained/1)
+```
+
+## Part 2
+
+```elixir
+input
+|> Enum.count(&Cleanup.overlaps/1)
+```

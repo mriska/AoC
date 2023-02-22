@@ -1,0 +1,77 @@
+# Day 3
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.1"}
+])
+```
+
+## Section
+
+```elixir
+text = Kino.Input.textarea("Input here:")
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input =
+  text
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn contents ->
+    midpoint = div(String.length(contents), 2)
+    String.split_at(contents, midpoint)
+  end)
+
+defmodule Packing do
+  def errors({compartment1, compartment2}) do
+    MapSet.intersection(
+      map_set_from_binary(compartment1),
+      map_set_from_binary(compartment2)
+    )
+    |> MapSet.to_list()
+    |> Enum.at(0)
+  end
+
+  def priority(<<codepoint::utf8, _rest::binary>>) when codepoint >= ?a and codepoint <= ?z do
+    codepoint - ?a + 1
+  end
+
+  def priority(<<codepoint::utf8, _rest::binary>>) when codepoint >= ?A and codepoint <= ?Z do
+    codepoint - ?A + 27
+  end
+
+  def group_badge(group_rucksacks) do
+    group_rucksacks
+    |> Enum.map(&map_set_from_binary/1)
+    |> Enum.reduce(&MapSet.intersection/2)
+    |> MapSet.to_list()
+    |> Enum.at(0)
+  end
+
+  defp map_set_from_binary(binary), do: MapSet.new(String.codepoints(binary))
+end
+
+input
+|> Enum.map(&Packing.errors/1)
+|> Enum.map(&Packing.priority/1)
+|> Enum.sum()
+```
+
+## Part 2
+
+```elixir
+input =
+  text
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+  |> Enum.chunk_every(3)
+
+input
+|> Enum.map(&Packing.group_badge/1)
+|> Enum.map(&Packing.priority/1)
+|> Enum.sum()
+```
