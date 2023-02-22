@@ -6,7 +6,7 @@ Mix.install([
 ])
 ```
 
-## Section
+## https://adventofcode.com/2022/day/2
 
 ```elixir
 text = Kino.Input.textarea("Input here:")
