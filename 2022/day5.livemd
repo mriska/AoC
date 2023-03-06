@@ -1,0 +1,120 @@
+# Day 5
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.1"}
+])
+```
+
+## https://adventofcode.com/2022/day/5
+
+```elixir
+text = Kino.Input.textarea("Input here:")
+```
+
+## Part 1
+
+```elixir
+
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Crates do
+  def parse_stacks(input) do
+    input
+    |> String.split("\n")
+    |> Enum.slice(0..-2)
+    |> Enum.reverse()
+    |> create_stacks
+  end
+
+  defp create_stacks(rows) do
+    row_length = String.length(Enum.at(rows, 0))
+    stacks_count = div(row_length + 1, 4)
+    empty_stacks = for _ <- 1..stacks_count, do: []
+
+    rows
+    |> Enum.reduce(empty_stacks, fn row, stacks ->
+      Enum.map(0..(stacks_count - 1), fn index ->
+        crate = String.at(row, index * 4 + 1)
+        stack = Enum.at(stacks, index)
+
+        case crate do
+          " " -> stack
+          crate -> [crate | stack]
+        end
+      end)
+    end)
+  end
+
+  def parse_instructions1(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.flat_map(&instruction_count1/1)
+  end
+
+  defp instruction_count1(text) do
+    ["move", count, "from", from, "to", to] = String.split(text, " ")
+
+    List.duplicate(
+      {String.to_integer(from) - 1, String.to_integer(to) - 1, 1},
+      String.to_integer(count)
+    )
+  end
+
+  def parse_instructions2(input) do
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(&instruction_count2/1)
+  end
+
+  defp instruction_count2(text) do
+    ["move", count, "from", from, "to", to] = String.split(text, " ")
+    {String.to_integer(from) - 1, String.to_integer(to) - 1, String.to_integer(count)}
+  end
+
+  def execute(stacks, []), do: stacks
+
+  def execute(stacks, [{from, to, count} | rest]) do
+    {values, tail} =
+      stacks
+      |> Enum.at(from)
+      |> Enum.split(count)
+
+    target_stack = Enum.at(stacks, to)
+
+    stacks
+    |> List.replace_at(from, tail)
+    |> List.replace_at(to, values ++ target_stack)
+    |> execute(rest)
+  end
+end
+
+input =
+  text
+  |> Kino.Input.read()
+
+[stacks, instructions] = String.split(input, "\n\n", trim: true)
+stacks = Crates.parse_stacks(stacks)
+instructions = Crates.parse_instructions1(instructions)
+
+Crates.execute(stacks, instructions)
+|> Enum.map(&List.first/1)
+|> Enum.join()
+```
+
+## Part 2
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+[stacks, instructions] = String.split(input, "\n\n", trim: true)
+stacks = Crates.parse_stacks(stacks)
+instructions = Crates.parse_instructions2(instructions)
+
+Crates.execute(stacks, instructions)
+|> Enum.map(&List.first/1)
+|> Enum.join()
+```

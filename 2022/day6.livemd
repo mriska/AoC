@@ -1,0 +1,48 @@
+# Day 6
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.1"}
+])
+```
+
+## https://adventofcode.com/2022/day/6
+
+```elixir
+text = Kino.Input.textarea("Input here:")
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input =
+  text
+  |> Kino.Input.read()
+  |> String.to_charlist()
+
+input
+|> Enum.chunk_every(4, 1)
+|> Enum.take_while(fn elements -> MapSet.size(MapSet.new(elements)) < 4 end)
+|> Enum.count()
+|> Kernel.+(4)
+```
+
+## Part 2
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input
+|> Enum.chunk_every(14, 1)
+|> Enum.take_while(fn elements -> MapSet.size(MapSet.new(elements)) < 14 end)
+|> Enum.count()
+|> Kernel.+(14)
+```
