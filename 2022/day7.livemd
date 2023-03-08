@@ -1,0 +1,126 @@
+# Day 7
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.1"}
+])
+```
+
+## https://adventofcode.com/2022/day/7
+
+```elixir
+text = Kino.Input.textarea("Input here:")
+```
+
+## Part 1
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule Terminal do
+  def parse_output(output), do: parse_output(output, %{}, [])
+
+  defp parse_output(output, result, path) do
+    {result, path} =
+      Enum.reduce(output, {result, path}, fn row, {result, path} ->
+        case row do
+          <<"$ cd ..">> ->
+            result = put_in(result, path ++ ["."], folder_size(result, path))
+            path = Enum.slice(path, 0..-2)
+            {result, path}
+
+          <<"$ cd ", dir::binary>> ->
+            path = path ++ [dir]
+            result = put_in(result, path, %{})
+            {result, path}
+
+          <<"$ ls">> ->
+            {result, path}
+
+          <<"dir", _dir::binary>> ->
+            {result, path}
+
+          _ ->
+            [size_string, file] = String.split(row, " ")
+            size = String.to_integer(size_string)
+            result = put_in(result, path ++ [file], {:file, file, size})
+            {result, path}
+        end
+      end)
+
+    # fully unwind path to make sure all folders get a size calculated
+    case path do
+      [] -> result
+      _ -> parse_output(["$ cd .."], result, path)
+    end
+  end
+
+  defp folder_size(result, path) do
+    get_in(result, path)
+    |> Map.values()
+    |> Enum.map(fn value ->
+      case value do
+        {:file, _, size} -> size
+        folder -> Access.get(folder, ".")
+      end
+    end)
+    |> Enum.sum()
+  end
+
+  def size(result) do
+    Map.values(result)
+    |> Enum.map(fn value ->
+      case value do
+        {:file, _, _} -> 0
+        _ when is_map(value) -> size(value)
+        size when size < 100_000 -> size
+        _size -> 0
+      end
+    end)
+    |> List.flatten()
+    |> Enum.sum()
+  end
+
+  def smallest_to_delete(result) do
+    free_space = 70_000_000 - get_in(result, ["/", "."])
+    needed_space = 30_000_000 - free_space
+
+    _sizes(result)
+    |> Enum.drop_while(&(&1 < needed_space))
+    |> List.first()
+  end
+
+  defp _sizes(result) do
+    Map.values(result)
+    |> Enum.map(fn value ->
+      case value do
+        {:file, _, _} -> nil
+        _ when is_map(value) -> _sizes(value)
+        size -> size
+      end
+    end)
+    |> List.flatten()
+    |> Enum.reject(&is_nil/1)
+    |> Enum.sort()
+  end
+end
+
+input =
+  text
+  |> Kino.Input.read()
+  |> String.split("\n", trim: true)
+
+input
+|> Terminal.parse_output()
+|> Terminal.size()
+```
+
+## Part 2
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+input
+|> Terminal.parse_output()
+|> Terminal.smallest_to_delete()
+```
